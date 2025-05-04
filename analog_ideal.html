@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analog Clock</title>
+</head>
+<body>
+    <script>
+        // Create namespace variable for convenience
+        const svgns = "http://www.w3.org/2000/svg";
+
+        // Create SVG element
+        const svg = document.createElementNS(svgns, "svg");
+        svg.setAttribute("width", "500");
+        svg.setAttribute("height", "500");
+        svg.setAttribute("viewBox", "0 0 500 500");
+
+        // Function that generates a clock face
+        function generateClock() {
+            // Get current time
+            const today = new Date();
+            let h = today.getHours() % 12; // 12-hour format
+            let m = today.getMinutes();
+            let s = today.getSeconds();
+
+            // Clear previous clock face
+            svg.innerHTML = "";
+
+            // Draw hour marks
+            for (let i = 0; i < 12; i++) {
+                let currentMark;
+                // Major hour marks
+                if (i % 3 === 0) {
+                    currentMark = document.createElementNS(svgns, "polygon");
+                    currentMark.setAttribute("points",
+                        `230,0 250,${20 * Math.sqrt(3)} 270,0`);
+                    currentMark.setAttribute("fill", "#000");
+                // Minor hour ticks
+                } else {
+                    currentMark = document.createElementNS(svgns, "line");
+                    currentMark.setAttribute("x1", 250);
+                    currentMark.setAttribute("y1", 0);
+                    currentMark.setAttribute("x2", 250);
+                    currentMark.setAttribute("y2", 20);
+                    currentMark.setAttribute("stroke", "#000");
+                    currentMark.setAttribute("stroke-width", 10);
+                }
+                currentMark.setAttribute("transform", `rotate(${i * 30}, 250, 250)`);
+                svg.appendChild(currentMark);
+            }
+
+            // Draw clock hands
+            let hHand = document.createElementNS(svgns, "polygon");
+            hHand.setAttribute("points",
+                `235,310 235,150 250,${150 - 15 * Math.sqrt(3)} 265,150 265,310`);
+            hHand.setAttribute("fill", "#000");
+            hHand.setAttribute("transform",
+                `rotate(${h * 30 + m / 2 + s / 120}, 250, 250)`);
+            let mHand = document.createElementNS(svgns, "polygon");
+            mHand.setAttribute("points",
+                `240,310 240,${30 * Math.sqrt(3)} `
+                + `250,${20 * Math.sqrt(3)} 260,${30 * Math.sqrt(3)} 260,310`);
+            mHand.setAttribute("fill", "#000");
+            mHand.setAttribute("transform", `rotate(${m * 6 + s / 10}, 250, 250)`);
+            let sHand = document.createElementNS(svgns, "line");
+            sHand.setAttribute("x1", 250);
+            sHand.setAttribute("y1", 0);
+            sHand.setAttribute("x2", 250);
+            sHand.setAttribute("y2", 350);
+            sHand.setAttribute("stroke", "#c8102e");
+            sHand.setAttribute("stroke-width", 10);
+            sHand.setAttribute("transform", `rotate(${s * 6}, 250, 250)`);
+
+            // Add clock hands to SVG
+            svg.appendChild(hHand);
+            svg.appendChild(mHand);
+            svg.appendChild(sHand);
+
+            // Update clock face every second
+            setTimeout(generateClock, 1000);
+        }
+
+        // Generate clock face on load
+        document.body.onload = generateClock;
+
+        // Add SVG to webpage
+        document.body.appendChild(svg);
+    </script>
+</body>
+</html>

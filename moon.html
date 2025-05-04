@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Phase</title>
+</head>
+<body>
+    <script>
+        // Function to calculate the current moon phase
+        function calculatePhase() {
+            const today = new Date();
+            const lastNew = new Date("2024-11-01T12:47Z");
+            const cycleLength = 29.53059;
+
+            let elapsedDays = (today - lastNew) / (1000 * 60 * 60 * 24);
+            elapsedDays %= cycleLength;
+            return elapsedDays / cycleLength;
+        }
+
+        // Function to return the nearest moon phase name
+        function getPhaseName() {
+            const nearestPhase = Math.round(8 * calculatePhase());
+            switch (nearestPhase) {
+                case 1:
+                    return "Waxing Crescent";
+                case 2:
+                    return "First Quarter";
+                case 3:
+                    return "Waxing Gibbous";
+                case 4:
+                    return "Full Moon";
+                case 5:
+                    return "Waning Gibbous";
+                case 6:
+                    return "Third Quarter";
+                case 7:
+                    return "Waning Crescent";
+                default:
+                    return "New Moon";
+            }
+        }
+
+        // Function to return the current percentage of moon illumination
+        function getMoonPercent() {
+            const phaseNum = calculatePhase();
+            if (phaseNum < 0.5) {
+                return phaseNum / 0.5;
+            } else {
+                return (1 - phaseNum) / 0.5;
+            }
+        }
+
+        // Create the SVG and append it to the body
+        const svgns = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgns, "svg");
+        svg.setAttribute("width", 200);
+        svg.setAttribute("height", 250);
+        document.body.appendChild(svg);
+
+        // Set the body background to black
+        document.body.style.background = "black";
+
+        // Function to update the SVG
+        function updateSVG() {
+            // Clear the SVG
+            while (svg.firstChild) {
+                svg.removeChild(svg.firstChild);
+            }
+
+            // Get the moon percent
+            const moonPercent = getMoonPercent();
+
+            // Get the phase number
+            const phaseNum = calculatePhase();
+
+            // Create the glow gradient
+            const defs = document.createElementNS(svgns, "defs");
+            const gradient = document.createElementNS(svgns, "radialGradient");
+            const stop1 = document.createElementNS(svgns, "stop");
+            const stop2 = document.createElementNS(svgns, "stop");
+            stop1.setAttribute("offset", "90%");
+            stop1.setAttribute("stop-color", "rgba(255, 255, 255, 0.2)");
+            stop2.setAttribute("offset", "100%");
+            stop2.setAttribute("stop-color", "rgba(255, 255, 255, 0)");
+            gradient.appendChild(stop1);
+            gradient.appendChild(stop2);
+            gradient.id = "glow";
+            gradient.setAttribute("cx", "50%");
+            gradient.setAttribute("cy", "50%");
+            gradient.setAttribute("r", "50%");
+            gradient.setAttribute("fx", "50%");
+            gradient.setAttribute("fy", "50%");
+            defs.appendChild(gradient);
+            svg.appendChild(defs);
+
+            // Create the glow
+            const glow = document.createElementNS(svgns, "circle");
+            glow.setAttribute("cx", 100);
+            glow.setAttribute("cy", 100);
+            glow.setAttribute("r", 100);
+            glow.setAttribute("fill", "url(#glow)");
+            svg.appendChild(glow);
+
+            // Create the left half-circle
+            const leftHalf = document.createElementNS(svgns, "path");
+            if (phaseNum < 0.5) {
+                leftHalf.setAttribute("fill", "black");
+            } else {
+                leftHalf.setAttribute("fill", "white");
+            }
+            leftHalf.setAttribute("d", "M 100,10 A 90,90 0 0,0 100,190 Z");
+            svg.appendChild(leftHalf);
+
+            // Create the right half-circle
+            const rightHalf = document.createElementNS(svgns, "path");
+            if (phaseNum < 0.5) {
+                rightHalf.setAttribute("fill", "white");
+            } else {
+                rightHalf.setAttribute("fill", "black");
+            }
+            rightHalf.setAttribute("d", "M 100,10 A 90,90 0 0,1 100,190 Z");
+            svg.appendChild(rightHalf);
+
+            // Create the ellipse
+            const ellipse = document.createElementNS(svgns, "ellipse");
+            ellipse.setAttribute("cx", 100);
+            ellipse.setAttribute("cy", 100);
+            ellipse.setAttribute("rx",
+                phaseNum < 0.25 || phaseNum > 0.75 ?
+                (0.5 - moonPercent) * 180 : (moonPercent - 0.5) * 180);
+            ellipse.setAttribute("ry", 90);
+            if (phaseNum < 0.25 || phaseNum > 0.75) {
+                ellipse.setAttribute("fill", "black");
+            } else {
+                ellipse.setAttribute("fill", "white");
+            }
+            svg.appendChild(ellipse);
+
+            // Add the moon percent
+            const moonPercentText = document.createElementNS(svgns, "text");
+            moonPercentText.setAttribute("x", 100);
+            moonPercentText.setAttribute("y", 220);
+            moonPercentText.setAttribute("text-anchor", "middle");
+            moonPercentText.setAttribute("fill", "white");
+            moonPercentText.textContent =
+                `${Math.round(moonPercent * 1000) / 10}%`;
+            svg.appendChild(moonPercentText);
+
+            // Add the phase name
+            const phaseName = document.createElementNS(svgns, "text");
+            phaseName.setAttribute("x", 100);
+            phaseName.setAttribute("y", 240);
+            phaseName.setAttribute("text-anchor", "middle");
+            phaseName.setAttribute("fill", "white");
+            phaseName.textContent = getPhaseName();
+            svg.appendChild(phaseName);
+        }
+
+        // Update the SVG
+        updateSVG();
+
+        // Update the SVG every hour
+        setInterval(updateSVG, 3600000);
+    </script>
+</body>
+</html>
